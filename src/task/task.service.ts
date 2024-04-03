@@ -7,7 +7,7 @@ export class TaskService {
   constructor(private prisma: PrismaService) {}
 
   async getById(id: string) {
-    const task = await this.prisma.task.findUnique({ where: { id: +id } });
+    const task = await this.prisma.task.findUnique({ where: { id: id } });
 
     if (!task) throw new NotAcceptableException('task not found');
 
@@ -26,7 +26,7 @@ export class TaskService {
     const task = await this.getById(id);
 
     return this.prisma.task.update({
-      where: { id: +id },
+      where: { id: id },
       data: { isDone: !task.isDone }
     });
   }

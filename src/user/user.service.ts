@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/user.dto';
 
 import { hash } from 'bcrypt';
+import { DeleteUserDto, GoogleLogInDto } from 'src/auth/dto/auth.dto';
 
 @Injectable()
 export class UserService {
@@ -16,7 +17,7 @@ export class UserService {
     });
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     return await this.prisma.user.findUnique({
       where: {
         id: id
@@ -38,5 +39,24 @@ export class UserService {
 
     const { password, ...result } = newUser;
     return result;
+  }
+
+  async createGoogleUser(dto: CreateUserDto) {
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...dto,
+        password: null
+      }
+    });
+
+    const { password, ...result } = newUser;
+    return result;
+  }
+
+  async deleteUser(dto: DeleteUserDto) {
+    const user = await this.findById(dto.id);
+    if (user) {
+      await this.prisma.user.delete({ where: { id: user.id } });
+    }
   }
 }

@@ -7,17 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum Role {
+  USER
+  AUTHOR
+}
+
 model Task {
-  id     Int      @id @default(autoincrement())
+  id     String      @id @default(uuid())
   name   String
   isDone Boolean? @default(false)
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       String     @id @default(uuid())
   email    String  @unique
-  name     String?
-  password String
+  name     String
+  password String? 
+  role     Role  @default(USER)
+  picture    String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime?
+  providerAccountId String? @unique
 }

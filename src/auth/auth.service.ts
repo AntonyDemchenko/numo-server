@@ -1,8 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LogInDto } from './dto/auth.dto';
+import { GenerateTokens, GoogleLogInDto, LogInDto } from './dto/auth.dto';
 import { UserService } from 'src/user/user.service';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+
+const EXPIRE_TIME = 20 * 1000;
+
+const EXPIN = '15m';
 
 @Injectable()
 export class AuthService {
@@ -15,22 +19,13 @@ export class AuthService {
     const user = await this.validateUser(dto);
 
     const payload = {
-      username: user.name,
+      email: user.email,
       sub: { name: user.name }
     };
 
     return {
       user: user,
-      backendTokens: {
-        accessToken: await this.jwtService.signAsync(payload, {
-          expiresIn: '20s',
-          secret: process.env.jwtSecretKey
-        }),
-        refreshToken: await this.jwtService.signAsync(payload, {
-          expiresIn: '7d',
-          secret: process.env.jwtRefreshTokenKey
-        })
-      }
+      backendTokens: await this.accessToken(payload)
     };
   }
 
@@ -52,7 +47,7 @@ export class AuthService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '20s',
+        expiresIn: EXPIN,
         secret: process.env.jwtSecretKey
       }),
       refreshToken: await this.jwtService.signAsync(payload, {
@@ -60,5 +55,47 @@ export class AuthService {
         secret: process.env.jwtRefreshTokenKey
       })
     };
+  }
+
+  async accessToken(payload: { email: string; sub: { name: string } }) {
+    return {
+      accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: EXPIN,
+        secret: process.env.jwtSecretKey
+      }),
+      refreshToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+        secret: process.env.jwtRefreshTokenKey
+      }),
+      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME)
+    };
+  }
+
+  async googleLogIn(dto: GoogleLogInDto) {
+    const user = await this.userService.findByEmail(dto.email);
+
+    if (user && user.providerAccountId === dto.providerAccountId) {
+      return { message: 'Login successful' };
+    }
+
+    const newUser = await this.userService.createGoogleUser(dto);
+    if (newUser.id) {
+      return { message: 'User saved successfully' };
+    }
+    return { message: 'Login failed' };
+  }
+
+  async generateTokens(dto: GenerateTokens) {
+    const user = await this.userService.findByEmail(dto.email);
+    if (user && user.providerAccountId === dto.providerAccountId) {
+      const payload = {
+        email: dto.email,
+        sub: { name: dto.name }
+      };
+      return {
+        user: user,
+        backendTokens: await this.accessToken(payload)
+      };
+    }
   }
 }
