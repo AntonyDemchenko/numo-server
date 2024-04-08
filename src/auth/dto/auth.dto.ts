@@ -74,3 +74,24 @@ export class GenerateTokens {
   @IsString()
   providerAccountId: string;
 }
+
+export class ResetTokenDto {
+  @IsString()
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  emailVerificationToken: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  password: string;
+
+  @IsString()
+  emailVerificationToken: string;
+}

@@ -26,7 +26,10 @@ model User {
   password String? 
   role     Role  @default(USER)
   picture    String?
+  providerAccountId String? @unique
+  emailVerified Boolean? @default(false)
+  emailVerificationToken String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime?
-  providerAccountId String? @unique
+
 }

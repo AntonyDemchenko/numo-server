@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsOptional,
   IsString,
@@ -24,6 +25,14 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   providerAccountId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  emailVerified?: boolean;
+
+  @IsOptional()
+  @IsString()
+  emailVerificationToken?: string;
 }
 
 export class CreatGoogleUserDto {}

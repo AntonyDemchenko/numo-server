@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Patch,
   Post,
   Request,
   UseGuards
@@ -14,10 +15,14 @@ import {
   DeleteUserDto,
   GenerateTokens,
   GoogleLogInDto,
-  LogInDto
+  LogInDto,
+  ResetPasswordDto,
+  ResetTokenDto
 } from './dto/auth.dto';
 import { RefreshJwtGuard } from './guards/refresh.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('AuthService')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -28,6 +33,21 @@ export class AuthController {
   @Post('signin')
   async signIn(@Body() dto: CreateUserDto) {
     return await this.userService.create(dto);
+  }
+
+  @Patch('resetToken')
+  async resetToken(@Body() dto: ResetTokenDto) {
+    return await this.userService.resetToken(dto);
+  }
+
+  @Patch('verifyUser')
+  async verifyUser(@Body() dto: ResetTokenDto) {
+    return await this.userService.verifyUser(dto);
+  }
+
+  @Patch('resetPassword')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return await this.userService.resetPassword(dto);
   }
 
   @Post('login')

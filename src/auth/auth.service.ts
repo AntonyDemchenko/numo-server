@@ -23,8 +23,11 @@ export class AuthService {
       sub: { name: user.name }
     };
 
+    const { id, name, email, picture, role } = user;
+    const userObject = { id, name, email, picture, role };
+
     return {
-      user: user,
+      user: userObject,
       backendTokens: await this.accessToken(payload)
     };
   }
@@ -32,7 +35,11 @@ export class AuthService {
   async validateUser(dto: LogInDto) {
     const user = await this.userService.findByEmail(dto.username);
 
-    if (user && (await compare(dto.password, user.password))) {
+    if (
+      user &&
+      (await compare(dto.password, user.password)) &&
+      user.emailVerified
+    ) {
       const { password, ...result } = user;
       return result;
     }
@@ -92,8 +99,10 @@ export class AuthService {
         email: dto.email,
         sub: { name: dto.name }
       };
+      const { id, name, email, picture, role } = user;
+      const userObject = { id, name, email, picture, role };
       return {
-        user: user,
+        user: userObject,
         backendTokens: await this.accessToken(payload)
       };
     }
